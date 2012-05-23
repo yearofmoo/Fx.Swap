@@ -7,14 +7,14 @@ if(!window.Fx.Elements) {
 
 Fx.Swap = new Class({
 
-  Implements : [Options, Events],
+  Implements : [Options, Events, Chain],
 
   Binds : ['onComplete'],
 
   Binds : [],
 
   options : {
-    swapper : 'replace',
+    swapper : 'base',
     swapperOptions : {
 
     },
@@ -47,13 +47,17 @@ Fx.Swap = new Class({
     element.inject(this.getContainer());
   },
 
+  reverse : function() {
+    this.isReverse = !this.isReverse;
+  },
+
   getSwapper : function() {
     return this.swapper;
   },
 
   setSwapper : function(klass,options) {
     this.options.swapper = klass;
-    this.swapper = new Fx.Swap[klass](options);
+    this.swapper = new Fx.Swap.Swappers[klass](options);
   },
 
   getSwapperClass : function() {
@@ -77,8 +81,15 @@ Fx.Swap = new Class({
       this.hideElement(two);
       two.inject(this.getContainer());
     }
+    if(this.isReverse) {
+      var temp = one;
+      one = two;
+      two = temp;
+    }
     this.onBeforeSwap(one,two);
-    this.getSwapper().setup(this.getContainer(),one,two).start(function() {
+    var swapper = this.getSwapper();
+    swapper.setElements(this.getContainer(),one,two);
+    swapper.run(function() {
       this.onComplete(one,two);
     }.bind(this));
   },
@@ -89,276 +100,394 @@ Fx.Swap = new Class({
     var off = this.options.hiddenClassName;
     one.removeClass(on).addClass(off);
     two.removeClass(off).addClass(on); 
+    this.callChain();
   },
 
   onBeforeSwap : function(one,two) {
     $$(one,two).addClass('swap-active');
     one.addClass('swap-active-one');
     two.addClass('swap-active-two');
-    this.hideElement(two);
   },
 
   onAfterSwap : function(one,two) {
     $$(one,two).removeClass('swap-active');
     one.removeClass('swap-active-one');
     two.removeClass('swap-active-two');
-    this.hideElement(one);
   }
 
 });
 
-Fx.Swap.Replace = new Class({
+Fx.Swap.Swappers = {};
+Fx.Swap.Swappers.Base = new Class({
 
-  initialize : function(topContainer, options) {
-    this.owner = topContainer;
-    this.options = options || {};
-  },
-
-  setup : function(topContainer, containerA, containerB) {
-    this.one = containerA;
-    this.two = containerB;
-    return this;
-  },
-
-  start : function(onComplete) {
-    this.one.setStyle('display','none');
-    this.two.setStyle('display','block');
-    onComplete();
-    return this;
-  }
-
-});
-
-Fx.Swap.Slide = new Class({
-
-  Implements : [Options],
+  Implements : [Options, Events, Chain],
 
   options : {
     wait : true,
     fxOptions : {
-      link : 'cancel'
     },
-
-    animate : { 
-      slideOut : {
-        left : [0,-20],
-        opacity : 0
+    animations : {
+      before : {
+        set : {
+          '0' : {
+            height:'1',
+            position:'relative',
+            overflow:'hidden'
+          },
+          '1' : {
+            position:'absolute',
+            display:'block',
+            top : 0,
+            left : 0,
+            right : 0
+          },
+          '2' : {
+            position:'absolute',
+            display:'none',
+            top : 0,
+            left : 0,
+            right : 0
+          }
+        }
       },
-      slideIn : {
-        left : [20,0],
-        opacity : 1
+      during : {
+        start : {
+          '0':{
+            height:'2'
+          }
+        }
+      },
+      after : {
+        set : {
+          '0':{
+            overflow:'visible',
+            height:'auto'
+          },
+          '1' : {
+            display:'none',
+            position:'static'
+          },
+          '2' : {
+            display:'block',
+            position:'static'
+          }
+        }
       }
-    },
-  },
-
-  initialize : function(topContainer, options) {
-    this.owner = topContainer;
-    this.setOptions(options);
-  },
-
-  setup : function(topContainer, containerA, containerB) {
-    topContainer.setStyle('position','relative');
-    this.one = containerA;
-    this.two = containerB;
-    this.one.setStyles({
-      'display':'block',
-      'opacity':1,
-      'position':'relative'
-    });
-    this.two.setStyles({
-      'opacity':0,
-      'position':'relative'
-    });
-    this.morphOne = new Fx.Morph(this.one,this.options.fxOptions);
-    this.morphTwo = new Fx.Morph(this.two,this.options.fxOptions);
-    return this;
-  },
-
-  start : function(onComplete) {
-    this.onComplete = onComplete;
-    this.onSlideOut(this.one,function() {
-      this.onSlideIn(this.two,function() {
-        this.onComplete(onComplete);
-      }.bind(this));
-    }.bind(this));
-    return this;
-  },
-
-  onSlideOut : function(element,onReady) {
-    this.morphTwo.cancel();
-    this.morphOne.start(this.options.animate.slideOut);
-    this.options.wait ? this.morphOne.chain(onReady) : onReady();
-  },
-
-  onSlideIn : function(element,onReady) {
-    this.morphOne.cancel();
-    this.morphOne.set({ 'display':'none' });
-    this.morphTwo.set({ 'display':'block' });
-    this.morphTwo.start(this.options.animate.slideIn);
-    this.options.wait ? this.morphTwo.chain(onReady) : onReady();
-  },
-
-  onComplete : function(onComplete) {
-    onComplete();
-  }
-});
-
-Fx.Swap.Push = new Class({
-
-  Implements : [Options],
-
-  options : {
-    fxOptions : {}
+    }
   },
 
   initialize : function(options) {
     this.setOptions(options);
   },
 
-  setup : function(container,one,two) {
-    this.container = container;
-    this.container.setStyles({
-      'position':'relative',
-      'overflow':'hidden'
-    });
+  getAnimator : function() {
+    if(!this.animator) {
+      this.animator = new Fx.Elements(Object.values(this.getElements()),this.options.fxOptions);
+    }
+    return this.animator;
+  },
 
-    this.one = one;
-    var sizesOne = one.getDimensions();
-    var h1 = sizesOne.height;
-    one.setStyles({
-      'display':'block',
-      'position':'absolute',
-      'top':0,
-      'left':0,
-      'right':0
-    });
+  wait : function() {
+    return this.options.wait;
+  },
 
-    this.two = two;
-    var sizesTwo = two.getDimensions();
-    var h2 = sizesTwo.height;
-    two.setStyles({
-      'position':'absolute',
-      'display':'block',
-      'top':-h2,
-      'left':0,
-      'right':0
-    });
-
-    this.animator = new Fx.Elements([this.container,one,two],this.options.fxOptions);
-
-    this.styles = {
-      '0':{
-        'height':[h1,h2],
-      },
-      '1':{
-        'top':h2
-      },
-      '2':{
-        'top':0
-      }
+  setElements : function(container, one, two) {
+    this.elements = {
+      '0' : container,
+      '1' : one,
+      '2' : two
     };
-
-    return this;
   },
 
-  onComplete : function(fn) {
-    $$(this.one,this.two).setStyles({
-      'position':'static',
-      'height':'auto'
-    });
-    this.container.setStyles({
-      'height':'auto',
-      'overflow':'visible'
-    });
-    fn();
+  getElement : function(key) {
+    return this.getElements()[key];
   },
 
-  start : function(onComplete) {
-    this.animator.start(this.styles).chain(function() {
-      this.onComplete(onComplete);
-    }.bind(this));
+  getElements : function() {
+    return this.elements;
+  },
+
+  run : function(fn) {
+    var that = this;
+    that.before(function() {
+      that.during(function() {
+        that.after(function() {
+          fn();
+        });
+      });
+    });
+  },
+
+  animate : function(phase,fn) {
+    var values = this.getAnimationValues(phase);
+    if(values.set) {
+      this.animateSet(values.set);
+    }
+    if(values.start) {
+      this.animateStart(values.start);
+      var wait = values.wait || this.wait();
+      wait ? this.chain(fn) : fn();
+    }
+    else {
+      fn();
+    }
+  },
+
+  before : function(fn) {
+    this.animate('before',fn);
+  },
+
+  during : function(fn) {
+    this.animate('during',fn);
+  },
+
+  after : function(fn) {
+    this.animate('after',fn);
+  },
+
+  getCalculations : function(element) {
+    var size = element.getDimensions();
+    return {
+      width : size.width,
+      height : size.height,
+      left : size.width,
+      top : size.height
+    };
+  },
+
+  parseAnimationValues : function(element,values) {
+    var minus;
+    values = values || {};
+    ['top','left','width','height'].each(function(key) {
+      var value = values[key];
+      if(typeOf(value) == 'string' && value.length <= 2) {
+        minus = false;
+        var element = value;
+        if(value.length == 2) {
+          minus = value.charAt(0) == '-';
+          value = value.substr(1);
+          element = value;
+        }
+        element = this.getElement(element);
+        value = this.getCalculations(element)[key];
+        if(minus) {
+          value *= -1;
+        }
+        values[key]=value;
+      }
+    },this);
+    return values;
+  },
+
+  getAnimations : function() {
+    return this.options.animations;
+  },
+
+  getAnimationValues : function(phase) {
+    var values = {
+      set : {},
+      start : {}
+    };
+    ['0','1','2'].each(function(key) {
+      var data = this.getElementAnimationValues(key,phase);
+      ['start','set'].each(function(area) {
+        if(data[area]) {
+          values[area][key]=data[area]
+        }
+      });
+    },this);
+    if(Object.keys(values.set).length==0) {
+      delete values.set;
+    }
+    if(Object.keys(values.start).length==0) {
+      delete values.start;
+    }
+    return values;
+  },
+
+  getElementAnimationValues : function(key,phase) {
+    var element = this.getElement(key);
+    var values = this.getAnimations()[phase];
+    var start = set = null;
+    var wait = false;
+    if(values) {
+      wait = values.wait;
+      set = values.set && values.set[key] ? this.parseAnimationValues(element,values.set[key]) : null;
+      start = values.start && values.start[key] ? this.parseAnimationValues(element,values.start[key]) : null;
+    }
+    return {
+      wait : wait,
+      set : set,
+      start : start
+    };
+  },
+
+  animateSet : function(styles) {
+    this.getAnimator().set(styles);
+  },
+
+  animateStart : function(styles) {
+    this.getAnimator().start(styles).chain(this.callChain.bind(this));
   }
 
 });
 
-Fx.Swap.Fade = new Class({
+Fx.Swap.Swappers.Replace = new Class({
 
-  Implements : [Options],
-
-  options : {
-    fxOptions : {}
-  },
+  Extends : Fx.Swap.Swappers.Base,
 
   initialize : function(options) {
-    this.setOptions(options);
-  },
-
-  setup : function(container,one,two) {
-    this.container = container;
-    this.container.setStyles({
-      'position':'relative',
-      'overflow':'hidden'
-    });
-
-    this.one = one;
-    var sizesOne = one.getDimensions();
-    var h1 = sizesOne.height;
-    one.setStyles({
-      'opacity':1
-    });
-
-    this.two = two;
-    var sizesTwo = two.getDimensions();
-    var h2 = sizesTwo.height;
-    two.setStyles({
-      'opacity':0
-    });
-
-    $$(one,two).setStyles({
-      'display':'block',
-      'position':'absolute',
-      'top':0,
-      'left':0,
-      'right':0
-    });
-
-    this.animator = new Fx.Elements([this.container,one,two],this.options.fxOptions);
-
-    this.styles = {
-      '0':{
-        'height':[h1,h2],
+    this.parent(options);
+    this.options.animations = {
+      before : {
+        set : {
+          '1' : {
+            display : 'block'
+          },
+          '2' : {
+            display : 'none'
+          }
+        }
       },
-      '1':{
-        'opacity':0
-      },
-      '2':{
-        'opacity':1
+      after : {
+        set : {
+          '1' : {
+            display : 'none'
+          },
+          '2' : {
+            display : 'block'
+          }
+        }
       }
-    };
-
-    return this;
-  },
-
-  onComplete : function(fn) {
-    $$(this.one,this.two).setStyles({
-      'position':'static',
-      'height':'auto'
-    });
-    this.container.setStyles({
-      'height':'auto',
-      'overflow':'visible'
-    });
-    fn();
-  },
-
-  start : function(onComplete) {
-    this.animator.start(this.styles).chain(function() {
-      this.onComplete(onComplete);
-    }.bind(this));
+    }
   }
 
 });
 
-Fx.Swap.Cube = {
+Fx.Swap.Swappers.Fade = new Class({
 
-};
+  Extends : Fx.Swap.Swappers.Base,
+
+  options : {
+    animations : {
+      before : {
+        set : {
+          '1' : {
+            display : 'block',
+            opacity : 1,
+          },
+          '2' : {
+            display : 'block',
+            opacity : 0
+          }
+        }
+      },
+      during : {
+        start : {
+          '1':{
+            opacity : 0
+          },
+          '2':{
+            opacity : 1
+          }
+        }
+      }
+    }
+  }
+
+});
+
+Fx.Swap.Swappers.Push = new Class({
+
+  Extends : Fx.Swap.Swappers.Base,
+
+  options : {
+    animations : {
+      before : {
+        set : {
+          '1' : {
+            top : 0
+          },
+          '2' : {
+            display : 'block',
+            top : '-2'
+          }
+        }
+      },
+      during : {
+        start : {
+          '1':{
+            top : '2'
+          },
+          '2':{
+            top : 0
+          }
+        }
+      }
+    }
+  }
+
+});
+
+Fx.Swap.Swappers.Slide = new Class({
+
+  Extends : Fx.Swap.Swappers.Base,
+
+  options : {
+    animations : {
+      before : {
+        set : {
+          '1' : {
+            top : 0
+          },
+          '2' : {
+            display : 'block',
+            top : '-2'
+          }
+        }
+      },
+      during : {
+        start : {
+          '1':{
+            top : 0
+          },
+          '2':{
+            top : 0
+          }
+        }
+      }
+    }
+  }
+
+});
+
+Fx.Swap.Swappers.Swap = new Class({
+
+  Extends : Fx.Swap.Swappers.Base,
+
+  options : {
+    animations : {
+      before : {
+        start : {
+          '1' : {
+            top : '-1'
+          }
+        }
+      },
+      during : {
+        set : {
+          '2' : {
+            top : '-2',
+            display : 'block'
+          }
+        },
+        start : {
+          '2' : {
+            top : 0
+          }
+        }
+      }
+    }
+  }
+
+});

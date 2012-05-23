@@ -19,15 +19,15 @@ h1 {
 }
 .container {
   border:1px solid #ddd;
-  padding:10px;
+  padding:30px;
 }
 section { 
   padding:1em;
   margin:1em;
   border:1px solid #ddd;
 }
-.slide {
-  padding:10px;
+.current {
+  background:white;
 }
 .slide.swap-active-two {
   border-bottom:1px solid #ddd;
@@ -43,7 +43,6 @@ nav a {
 }
 .page-stuff {
   font-size:2em;
-  padding:1em;
 }
 </style>
 </head> 
@@ -54,6 +53,9 @@ nav a {
       <header>
         <h1>Fx.Swap.Replace</h1>
       </header>
+      <nav>
+        <a href="#" id="one-swap">Swap</a>
+      </nav>
       <div id="one-hidden" class="container">
         <div class="inner">
           <div class="slide">
@@ -64,9 +66,6 @@ nav a {
           </div>
         </div>
       </div>
-      <nav>
-        <a href="#" id="one-swap">Swap</a>
-      </nav>
     </section>
   </div>
 <script type="text/javascript" src="../Assets/MooTools-core.js"></script>
@@ -76,7 +75,7 @@ nav a {
 window.addEvent('domready',function() {
   var container = document.getElement('#one-hidden .inner');
   var c_one = new Fx.Swap(container);
-  c_one.setSwapper('Push');
+  c_one.setSwapper('Fade');
   var next;
   $('one-swap').addEvent('click',function(event) {
     event.stop();
