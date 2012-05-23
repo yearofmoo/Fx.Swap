@@ -1,0 +1,107 @@
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+<title>Fx.Swap Demo Example</title> 
+<link rel="stylesheet" type="text/css" href="../Assets/reset.css" />
+<style type="text/css">
+body {
+  padding:20px;
+  font-size:15px;
+  font-family:Verdana;
+}
+.hidden {
+  display:none;
+}
+h1 {
+  font-size:1.5em;
+  color:maroon;
+  margin-bottom:20px;
+}
+.container {
+  border:1px solid #ddd;
+  padding:10px;
+}
+section { 
+  padding:1em;
+  margin:1em;
+  border:1px solid #ddd;
+}
+.slide {
+  padding:10px;
+}
+.slide.swap-active-two {
+  border-bottom:1px solid #ddd;
+}
+nav {
+  margin-top:1em;
+}
+nav a {
+  display:inline-block;
+  padding:10px;
+  border:1px solid #ddd;
+  border-radius:5px;
+}
+.page-stuff {
+  font-size:2em;
+  padding:1em;
+}
+</style>
+</head> 
+
+<body id="" class=""> 
+  <div id="wrapper">
+    <section>
+      <header>
+        <h1>Fx.Swap.Replace</h1>
+      </header>
+      <div id="one-hidden" class="container">
+        <div class="inner">
+          <div class="slide">
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In malesuada risus eu magna posuere eu laoreet odio ornare. Proin malesuada gravida magna at lacinia. Donec metus erat, rutrum sit amet faucibus quis, mattis at sem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean feugiat nibh in quam facilisis a rutrum risus malesuada. Fusce libero libero, scelerisque eget luctus a, blandit vel nisi. Proin elit nisi, adipiscing nec congue et, ornare vel enim. Nam orci dui, volutpat vitae fringilla vitae, scelerisque ut neque. Etiam libero orci, consequat ac porttitor a, feugiat nec orci. Nullam volutpat rhoncus dolor sed pellentesque. Etiam ornare, enim molestie semper imperdiet, urna ligula porta massa, in tempor diam quam ut velit. Ut sit amet nulla sem, pellentesque bibendum elit. Sed lectus libero, iaculis a vestibulum at, laoreet tempor orci. Praesent scelerisque urna et velit eleifend viverra.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In malesuada risus eu magna posuere eu laoreet odio ornare. Proin malesuada gravida magna at lacinia. Donec metus erat, rutrum sit amet faucibus quis, mattis at sem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean feugiat nibh in quam facilisis a rutrum risus malesuada. Fusce libero libero, scelerisque eget luctus a, blandit vel nisi. Proin elit nisi, adipiscing nec congue et, ornare vel enim. Nam orci dui, volutpat vitae fringilla vitae, scelerisque ut neque. Etiam libero orci, consequat ac porttitor a, feugiat nec orci. Nullam volutpat rhoncus dolor sed pellentesque. Etiam ornare, enim molestie semper imperdiet, urna ligula porta massa, in tempor diam quam ut velit. Ut sit amet nulla sem, pellentesque bibendum elit. Sed lectus libero, iaculis a vestibulum at, laoreet tempor orci. Praesent scelerisque urna et velit eleifend viverra.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In malesuada risus eu magna posuere eu laoreet odio ornare. Proin malesuada gravida magna at lacinia. Donec metus erat, rutrum sit amet faucibus quis, mattis at sem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean feugiat nibh in quam facilisis a rutrum risus malesuada. Fusce libero libero, scelerisque eget luctus a, blandit vel nisi. Proin elit nisi, adipiscing nec congue et, ornare vel enim. Nam orci dui, volutpat vitae fringilla vitae, scelerisque ut neque. Etiam libero orci, consequat ac porttitor a, feugiat nec orci. Nullam volutpat rhoncus dolor sed pellentesque. Etiam ornare, enim molestie semper imperdiet, urna ligula porta massa, in tempor diam quam ut velit. Ut sit amet nulla sem, pellentesque bibendum elit. Sed lectus libero, iaculis a vestibulum at, laoreet tempor orci. Praesent scelerisque urna et velit eleifend viverra.</p>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. In malesuada risus eu magna posuere eu laoreet odio ornare. Proin malesuada gravida magna at lacinia. Donec metus erat, rutrum sit amet faucibus quis, mattis at sem. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia Curae; Aenean feugiat nibh in quam facilisis a rutrum risus malesuada. Fusce libero libero, scelerisque eget luctus a, blandit vel nisi. Proin elit nisi, adipiscing nec congue et, ornare vel enim. Nam orci dui, volutpat vitae fringilla vitae, scelerisque ut neque. Etiam libero orci, consequat ac porttitor a, feugiat nec orci. Nullam volutpat rhoncus dolor sed pellentesque. Etiam ornare, enim molestie semper imperdiet, urna ligula porta massa, in tempor diam quam ut velit. Ut sit amet nulla sem, pellentesque bibendum elit. Sed lectus libero, iaculis a vestibulum at, laoreet tempor orci. Praesent scelerisque urna et velit eleifend viverra.</p>
+          </div>
+        </div>
+      </div>
+      <nav>
+        <a href="#" id="one-swap">Swap</a>
+      </nav>
+    </section>
+  </div>
+<script type="text/javascript" src="../Assets/MooTools-core.js"></script>
+<script type="text/javascript" src="../Assets/MooTools-more.js"></script>
+<script type="text/javascript" src="../../Source/Fx.Swap.js"></script>
+<script type="text/javascript">
+window.addEvent('domready',function() {
+  var container = document.getElement('#one-hidden .inner');
+  var c_one = new Fx.Swap(container);
+  c_one.setSwapper('Push');
+  var next;
+  $('one-swap').addEvent('click',function(event) {
+    event.stop();
+    var element;
+    if(!next) {
+      next = c_one.getCurrentElement();
+      element = new Element('div',{
+        'html':'....replaced....',
+        'class':'slide'
+      });
+      new Request({
+        url : './page.html',
+        method : 'GET',
+        onSuccess : function(data) {
+          var elm = new Element('div').set('html',data);
+          c_one.swap(elm);
+        }
+      }).send();
+    }
+    else {
+      element = next;
+      c_one.swap(element);
+    }
+  });
+});
+</script>
+</body>
+</html> 
