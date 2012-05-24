@@ -124,6 +124,7 @@ Fx.Swap.Swappers.Base = new Class({
 
   options : {
     wait : true,
+    zIndexBase : 1000,
     fxOptions : {
     },
     animations : {
@@ -276,6 +277,7 @@ Fx.Swap.Swappers.Base = new Class({
         values[key]=value;
       }
     },this);
+    values['z-index'] = this.getNextZIndexValue();
     return values;
   },
 
@@ -303,6 +305,13 @@ Fx.Swap.Swappers.Base = new Class({
       delete values.start;
     }
     return values;
+  },
+
+  getNextZIndexValue : function() {
+    if(!this.z) {
+      this.z = this.options.zIndexBase;
+    }
+    return ++this.z;
   },
 
   getElementAnimationValues : function(key,phase) {

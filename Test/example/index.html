@@ -75,7 +75,7 @@ nav a {
 window.addEvent('domready',function() {
   var container = document.getElement('#one-hidden .inner');
   var c_one = new Fx.Swap(container);
-  c_one.setSwapper('Fade');
+  c_one.setSwapper('Push');
   var next;
   $('one-swap').addEvent('click',function(event) {
     event.stop();
