@@ -57,7 +57,7 @@ Fx.Swap = new Class({
   },
 
   setSwapper : function(klass,options) {
-    options = Object.append(options,this.options.swapOptions);
+    options = Object.append(this.options.swapperOptions,options);
     this.options.swapper = klass;
     this.swapper = new Fx.Swap.Swappers[klass](options);
   },
