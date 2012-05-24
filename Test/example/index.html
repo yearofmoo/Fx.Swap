@@ -53,8 +53,10 @@ nav a {
       <header>
         <h1>Fx.Swap.Replace</h1>
       </header>
-      <nav>
-        <a href="#" id="one-swap">Swap</a>
+      <nav class="pages">
+        <a href="./page.html">Page 1</a>
+        <a href="./page2.html">Page 2</a>
+        <a href="./page3.html">Page 3</a>
       </nav>
       <div id="one-hidden" class="container">
         <div class="inner">
@@ -74,32 +76,33 @@ nav a {
 <script type="text/javascript">
 window.addEvent('domready',function() {
   var container = document.getElement('#one-hidden .inner');
-  var c_one = new Fx.Swap(container);
-  c_one.setSwapper('Push');
-  var next;
-  $('one-swap').addEvent('click',function(event) {
-    event.stop();
+  var swapper = new Fx.Swap(container);
+  swapper.setSwapper('Fade');
+
+  $$('.pages a').addEvent('click',function(event) {
     var element;
-    if(!next) {
-      next = c_one.getCurrentElement();
-      element = new Element('div',{
-        'html':'....replaced....',
-        'class':'slide'
-      });
+    var href = $(this).get('href');
+    event.stop();
+
+    var onReady = function(element) {
+      swapper.swap(element);
+    };
+
+    if(!element) {
       new Request({
-        url : './page.html',
+        url : href,
         method : 'GET',
         onSuccess : function(data) {
-          var elm = new Element('div').set('html',data);
-          c_one.swap(elm);
+          element = new Element('div').set('html',data);
+          onReady(element);
         }
       }).send();
     }
     else {
-      element = next;
-      c_one.swap(element);
+      onReady(element);
     }
   });
+
 });
 </script>
 </body>

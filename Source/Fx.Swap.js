@@ -65,7 +65,14 @@ Fx.Swap = new Class({
   },
 
   getCurrentElement : function() {
-    return this.getContainer().getElement('.'+this.options.elementClassName);
+    if(!this.currentElement) {
+      this.currentElement = this.getContainer().getElement('.'+this.options.elementClassName);
+    }
+    return this.currentElement;
+  },
+
+  setCurrentElement : function(element) {
+    this.currentElement = element;
   },
 
   swap : function(element) {
@@ -79,12 +86,7 @@ Fx.Swap = new Class({
   swapElements : function(one,two) {
     if(!two.ownerNode) {
       this.hideElement(two);
-      two.inject(this.getContainer());
-    }
-    if(this.isReverse) {
-      var temp = one;
-      one = two;
-      two = temp;
+      two.inject(this.getContainer(),'bottom');
     }
     this.onBeforeSwap(one,two);
     var swapper = this.getSwapper();
@@ -104,6 +106,7 @@ Fx.Swap = new Class({
   },
 
   onBeforeSwap : function(one,two) {
+    this.setCurrentElement(one);
     $$(one,two).addClass('swap-active');
     one.addClass('swap-active-one');
     two.addClass('swap-active-two');
@@ -113,6 +116,8 @@ Fx.Swap = new Class({
     $$(one,two).removeClass('swap-active');
     one.removeClass('swap-active-one');
     two.removeClass('swap-active-two');
+    this.hideElement(one);
+    this.setCurrentElement(two);
   }
 
 });
@@ -152,7 +157,7 @@ Fx.Swap.Swappers.Base = new Class({
         }
       },
       during : {
-        start : {
+        set : {
           '0':{
             height:'2'
           }
@@ -198,6 +203,7 @@ Fx.Swap.Swappers.Base = new Class({
       '1' : one,
       '2' : two
     };
+    this.animator = null;
   },
 
   getElement : function(key) {
