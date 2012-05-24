@@ -23,7 +23,8 @@ Fx.Swap = new Class({
     hiddenClassName : null
   },
 
-  initialize : function(container) {
+  initialize : function(container,options) {
+    this.setOptions(options);
     this.setContainer(container);
     this.setSwapper(this.getSwapperClass(),this.options.swapperOptions);
     this.setCurrentElement(this.getContainer().getFirst());
