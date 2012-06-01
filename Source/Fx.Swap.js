@@ -159,7 +159,7 @@ Fx.Swap.Swappers.Base = new Class({
         }
       },
       during : {
-        set : {
+        start : {
           '0':{
             height:'2'
           }
@@ -266,7 +266,7 @@ Fx.Swap.Swappers.Base = new Class({
 
   parseAnimationValues : function(element,values) {
     var minus;
-    values = values || {};
+    values = values ? Object.clone(values) : {};
     ['top','left','width','height'].each(function(key) {
       var value = values[key];
       if(typeOf(value) == 'string' && value.length <= 2) {
